@@ -1,14 +1,16 @@
-import React, {useState, Fragment} from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
+
+const stateInicial = {
+  mascota: '',
+  propietario: '',
+  fecha: '',
+  hora: '',
+  sintomas: ''
+}
 
 function Formulario(props){
 
-  const [cita, actualizarCita] = useState({
-    mascota: '',
-    propietario: '',
-    fecha: '',
-    hora: '',
-    sintomas: ''
-  })
+  const [cita, actualizarCita] = useState(stateInicial)
 
   const actualizarState = (e) => {
     actualizarCita({
@@ -25,13 +27,7 @@ function Formulario(props){
     props.crearCita(cita)
 
     //Reiniciar el state
-    actualizarCita({
-      mascota: '',
-      propietario: '',
-      fecha: '',
-      hora: '',
-      sintomas: ''
-    })
+    actualizarCita(stateInicial)
   }
 
   return(
@@ -107,7 +103,16 @@ function Cita({cita, index, eliminarCita}) {
 
 function App(){
 
-  const [citas, guardarCita] = useState([])
+
+  //cargar las citas de loicalstorage como state inicial
+  let citasIniciales = JSON.parse(localStorage.getItem('citas'))
+
+  if(!citasIniciales) {
+    citasIniciales = []
+  }
+
+  //Funcion que actualiza el state this.setState()
+  const [citas, guardarCita] = useState(citasIniciales)
 
   //Agregar las nuevas citas al state
   const crearCita = cita => {
@@ -124,6 +129,18 @@ function App(){
 
   //Cargar condicionalmente un Titulo 
   const titulo = Object.keys(citas).length === 0 ? "No hay citas" : "Administar Las citas Aqui";
+
+  //UseEffect
+  useEffect(()=>{
+    let citasIniciales = JSON.parse(localStorage.getItem('citas'))
+
+    if(citasIniciales){
+      localStorage.setItem('citas', JSON.stringify(citas))
+    } else {
+      localStorage.setItem('citas', JSON.stringify([]))
+    }
+
+  }, [citas])
 
   return(
     <Fragment>
